@@ -1,0 +1,18 @@
+pkg.name: apps/test_sensor
+pkg.type: app
+
+pkg.deps:
+  - "@apache-mynewt-core/libc/baselibc"
+  - "@apache-mynewt-core/kernel/os"
+  - "@apache-mynewt-core/sys/sysinit"
+  - "@apache-mynewt-core/sys/shell"
+  - "@apache-mynewt-core/sys/console/full"
+  - "@apache-mynewt-core/sys/log/full"
+  - "@apache-mynewt-core/sys/stats/full"
+  - "@apache-mynewt-core/hw/hal"
+  - "@apache-mynewt-core/mgmt/imgmgr"
+  - "@apache-mynewt-core/mgmt/newtmgr"
+  - "@apache-mynewt-core/mgmt/newtmgr/transport/nmgr_shell"
+  - "@apache-mynewt-core/boot/split"
+  - "@apache-mynewt-core/boot/bootutil"
+  - "drivers/lsm9ds1"

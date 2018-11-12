@@ -1,0 +1,21 @@
+syscfg.vals:
+  # Use INFO log level to reduce code size.  DEBUG is too large for nRF51.
+  LOG_LEVEL: 1
+  REBOOT_LOG_CONSOLE: 1
+
+  # Enable the shell task.
+  SHELL_TASK: 1
+
+  # Include names for statistics.
+  STATS_NAMES: 1
+
+  # Enable shell commands.
+  STATS_CLI: 1
+  LOG_CLI: 1
+  CONFIG_CLI: 1
+
+  # Enable newtmgr commands.
+  STATS_NEWTMGR: 1
+  LOG_NEWTMGR: 1
+  CONFIG_NEWTMGR: 1
+    
