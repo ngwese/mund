@@ -18,4 +18,7 @@ syscfg.vals:
   STATS_NEWTMGR: 1
   LOG_NEWTMGR: 1
   CONFIG_NEWTMGR: 1
+
+  # Disable sensor package OIC integration
+  SENSOR_OIC: 0
     
