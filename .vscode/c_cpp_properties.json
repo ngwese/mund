@@ -1,0 +1,8 @@
+{
+    "name": "mund",
+    "includePath": [
+        "${workspaceFolder}"
+    ],
+    "compilerPath": "/opt/bin/arm-none-eabi-gcc",
+    "intelliSenseMode": "gcc"
+}
