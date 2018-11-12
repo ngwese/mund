@@ -1,8 +1,13 @@
 {
-    "name": "mund",
-    "includePath": [
-        "${workspaceFolder}"
+    "configurations": [
+        {
+            "name": "mund",
+            "includePath": [
+                "${workspaceFolder}"
+            ],
+            "compilerPath": "/opt/bin/arm-none-eabi-gcc",
+            "intelliSenseMode": "gcc-x64"
+        }
     ],
-    "compilerPath": "/opt/bin/arm-none-eabi-gcc",
-    "intelliSenseMode": "gcc"
+    "version": 4
 }
