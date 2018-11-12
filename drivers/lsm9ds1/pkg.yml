@@ -1,0 +1,16 @@
+pkg.name: drivers/lsm9ds1
+pkg.description: LSM9DS1 driver interface
+pkg.author: "Greg Wuller <greg@afofo.com>"
+pkg.keywords:
+  - lsm9ds1
+  - i2c
+  - sensor
+
+pkg.deps:
+  - "@apache-mynewt-core/kernel/os"
+  - "@apache-mynewt-core/net/oic"
+  - "@apache-mynewt-core/hw/hal"
+  - "@apache-mynewt-core/hw/sensor"
+
+# pkg.req_apis:
+#     - ADC_HW_IMPL
