@@ -21,4 +21,8 @@ syscfg.vals:
 
   # Disable sensor package OIC integration
   SENSOR_OIC: 0
+
+  # Set speed of I2C bus
+  I2C_0_FREQ_KHZ: 400
+
     
