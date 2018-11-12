@@ -158,7 +158,7 @@ err:
  */
 int
 lsm9ds1_read48(struct sensor_itf *itf, uint8_t addr, uint8_t reg,
-               int8_t *buffer)
+               uint8_t *buffer)
 {
     int rc;
     uint8_t payload[7] = { reg, 0, 0, 0, 0, 0, 0 };
@@ -220,9 +220,10 @@ lsm9ds1_init(struct os_dev *dev, void *arg)
         goto err;
     }
 
-    lsm = (lsm9ds1_t *) dev;
+    lsm = (lsm9ds1_t *)dev;
 
-    lsm->cfg.mask = SENSOR_TYPE_ALL;
+    lsm->cfg.mask = SENSOR_TYPE_LINEAR_ACCEL | SENSOR_TYPE_GYROSCOPE |
+                    SENSOR_TYPE_MAGNETIC_FIELD;
 
     log_register(dev->od_name, &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 
@@ -244,8 +245,7 @@ lsm9ds1_init(struct os_dev *dev, void *arg)
     }
 
     /* Add the accelerometer/magnetometer driver */
-    rc = sensor_set_driver(sensor, SENSOR_TYPE_ACCELEROMETER |
-            SENSOR_TYPE_MAGNETIC_FIELD,
+    rc = sensor_set_driver(sensor, lsm->cfg.mask,
             (struct sensor_driver *) &g_lsm9ds1_sensor_driver);
     if (rc != 0) {
         goto err;
@@ -368,8 +368,9 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
     }databuf;
 
     /* If the read isn't looking for accel or mag data, don't do anything. */
-    if (!(type & SENSOR_TYPE_ACCELEROMETER) &&
-       (!(type & SENSOR_TYPE_MAGNETIC_FIELD))) {
+    if ((!(type & SENSOR_TYPE_LINEAR_ACCEL)) &&
+        (!(type & SENSOR_TYPE_GYROSCOPE)) &&
+        (!(type & SENSOR_TYPE_MAGNETIC_FIELD))) {
         rc = SYS_EINVAL;
         goto err;
     }
@@ -378,42 +379,42 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
     lsm = (lsm9ds1_t *) SENSOR_GET_DEVICE(sensor);
 
     /* Get a new accelerometer sample */
-    if (type & SENSOR_TYPE_ACCELEROMETER) {
+    if (type & SENSOR_TYPE_LINEAR_ACCEL) {
         x = y = z = 0;
         rc = lsm9ds1_read48(itf, lsm->cfg.accel_addr,
-                               lsm9ds1_REGISTER_ACCEL_OUT_X_L_A | 0x80,
+                               LSM9DS1_REGISTER_OUT_X_L_XL,
                                payload);
         if (rc != 0) {
             goto err;
         }
 
-        /* Shift 12-bit left-aligned accel values into 16-bit int */
-        x = ((int16_t)(payload[0] | (payload[1] << 8))) >> 4;
-        y = ((int16_t)(payload[2] | (payload[3] << 8))) >> 4;
-        z = ((int16_t)(payload[4] | (payload[5] << 8))) >> 4;
+        /* Shift accel values into 16-bit int */
+        x = (int16_t)(payload[0] | (payload[1] << 8));
+        y = (int16_t)(payload[2] | (payload[3] << 8));
+        z = (int16_t)(payload[4] | (payload[5] << 8));
 
         /* Determine mg per lsb based on range */
         switch(lsm->cfg.accel_range) {
-            case lsm9ds1_ACCEL_RANGE_2:
+            case LSM9DS1_ACCELRANGE_2G:
                 STATS_INC(g_lsm9ds1_stats, samples_acc_2g);
-                mg_lsb = 0.001F;
+                mg_lsb = LSM9DS1_ACCEL_MG_LSB_2G;
                 break;
-            case lsm9ds1_ACCEL_RANGE_4:
+            case LSM9DS1_ACCELRANGE_4G:
                 STATS_INC(g_lsm9ds1_stats, samples_acc_4g);
-                mg_lsb = 0.002F;
+                mg_lsb = LSM9DS1_ACCEL_MG_LSB_4G;
                 break;
-            case lsm9ds1_ACCEL_RANGE_8:
+            case LSM9DS1_ACCELRANGE_8G:
                 STATS_INC(g_lsm9ds1_stats, samples_acc_8g);
-                mg_lsb = 0.004F;
+                mg_lsb = LSM9DS1_ACCEL_MG_LSB_8G;
                 break;
-            case lsm9ds1_ACCEL_RANGE_16:
+            case LSM9DS1_ACCELRANGE_16G:
                 STATS_INC(g_lsm9ds1_stats, samples_acc_16g);
-                mg_lsb = 0.012F;
+                mg_lsb = LSM9DS1_ACCEL_MG_LSB_16G;
                 break;
             default:
                 LSM9DS1_ERR("Unknown accel range: 0x%02X. Assuming +/-2G.\n",
                     lsm->cfg.accel_range);
-                mg_lsb = 0.001F;
+                mg_lsb = LSM9DS1_ACCEL_MG_LSB_2G;
                 break;
         }
 
@@ -427,7 +428,7 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
         databuf.sad.sad_z_is_valid = 1;
 
         /* Call data function */
-        rc = data_func(sensor, data_arg, &databuf.sad, SENSOR_TYPE_ACCELEROMETER);
+        rc = data_func(sensor, data_arg, &databuf.sad, SENSOR_TYPE_LINEAR_ACCEL);
         if (rc != 0) {
             goto err;
         }
@@ -437,56 +438,42 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
     if (type & SENSOR_TYPE_MAGNETIC_FIELD) {
         x = y = z = 0;
         rc = lsm9ds1_read48(itf, lsm->cfg.mag_addr,
-                               lsm9ds1_REGISTER_MAG_OUT_X_H_M,
+                               LSM9DS1_REGISTER_OUT_X_L_M,
                                payload);
         if (rc != 0) {
             goto err;
         }
 
         /* Shift mag values into 16-bit int */
-        x = (int16_t)(payload[1] | ((int16_t)payload[0] << 8));
-        y = (int16_t)(payload[3] | ((int16_t)payload[2] << 8));
-        z = (int16_t)(payload[5] | ((int16_t)payload[4] << 8));
+        x = (int16_t)(payload[0] | ((int16_t)payload[1] << 8));
+        y = (int16_t)(payload[2] | ((int16_t)payload[3] << 8));
+        z = (int16_t)(payload[4] | ((int16_t)payload[5] << 8));
 
         /* Determine gauss per lsb based on gain */
+        // FIXME: these guass_lsb_* values are wrong
         switch (lsm->cfg.mag_gain) {
-            case lsm9ds1_MAG_GAIN_1_3:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_1_3g);
+            case LSM9DS1_MAGGAIN_4GAUSS:
+                STATS_INC(g_lsm9ds1_stats, samples_mag_4g);
                 gauss_lsb_xy = 1100;
                 gauss_lsb_z = 980;
                 break;
-            case lsm9ds1_MAG_GAIN_1_9:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_1_9g);
+            case LSM9DS1_MAGGAIN_8GAUSS:
+                STATS_INC(g_lsm9ds1_stats, samples_mag_8g);
                 gauss_lsb_xy = 855;
                 gauss_lsb_z = 760;
                 break;
-            case lsm9ds1_MAG_GAIN_2_5:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_2_5g);
+            case LSM9DS1_MAGGAIN_12GAUSS:
+                STATS_INC(g_lsm9ds1_stats, samples_mag_12g);
                 gauss_lsb_xy = 670;
                 gauss_lsb_z = 600;
                 break;
-            case lsm9ds1_MAG_GAIN_4_0:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_4_0g);
+            case LSM9DS1_MAGGAIN_16GAUSS:
+                STATS_INC(g_lsm9ds1_stats, samples_mag_16g);
                 gauss_lsb_xy = 450;
                 gauss_lsb_z = 400;
                 break;
-            case lsm9ds1_MAG_GAIN_4_7:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_4_7g);
-                gauss_lsb_xy = 400;
-                gauss_lsb_z = 355;
-                break;
-            case lsm9ds1_MAG_GAIN_5_6:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_5_6g);
-                gauss_lsb_xy = 330;
-                gauss_lsb_z = 295;
-                break;
-            case lsm9ds1_MAG_GAIN_8_1:
-                STATS_INC(g_lsm9ds1_stats, samples_mag_8_1g);
-                gauss_lsb_xy = 230;
-                gauss_lsb_z = 205;
-                break;
             default:
-                LSM9DS1_ERR("Unknown mag gain: 0x%02X. Assuming +/-1.3g.\n",
+                LSM9DS1_ERR("Unknown mag gain: 0x%02X. Assuming +/-4g.\n",
                     lsm->cfg.mag_gain);
                 gauss_lsb_xy = 1100;
                 gauss_lsb_z = 980;
@@ -509,6 +496,9 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
         }
     }
 
+    // TODO: implement SENSOR_TYPE_GYROSCOPE
+    // TODO: implement SENSOR_TYPE_TEMPERATURE
+
     return (0);
 err:
     return (rc);
@@ -520,7 +510,8 @@ lsm9ds1_sensor_get_config(struct sensor *sensor, sensor_type_t type,
 {
     int rc;
 
-    if ((type != SENSOR_TYPE_ACCELEROMETER) &&
+    if ((type != SENSOR_TYPE_LINEAR_ACCEL) &&
+        (type != SENSOR_TYPE_GYROSCOPE) &&
         (type != SENSOR_TYPE_MAGNETIC_FIELD)) {
         rc = SYS_EINVAL;
         goto err;
