@@ -1,4 +1,4 @@
-pkg.name: drivers/lsm9ds1
+pkg.name: hw/drivers/lsm9ds1
 pkg.description: LSM9DS1 driver interface
 pkg.author: "Greg Wuller <greg@afofo.com>"
 pkg.keywords:
