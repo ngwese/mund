@@ -6,7 +6,7 @@
 #include "hal/hal_gpio.h"
 #include "sysinit/sysinit.h"
 
-#include "lsm9ds1/lsm9ds1.h"
+//#include "lsm9ds1/lsm9ds1.h"
 
 int
 main(int argc, char **argv)

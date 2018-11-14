@@ -12,7 +12,7 @@
 // please support Adafruit andopen-source hardware by purchasing products
 // from Adafruit!
 //
-// Written by Kevin Townsend for Adafruit Industries.  
+// Written by Kevin Townsend for Adafruit Industries.
 // BSD license, all text above must be included in any redistribution
 
 #ifndef __SENSOR_LSM9DS1_H__
@@ -34,7 +34,7 @@ extern "C" {
 #define LSM9DS1_ACCEL_MG_LSB_2G            (0.061F)
 #define LSM9DS1_ACCEL_MG_LSB_4G            (0.122F)
 #define LSM9DS1_ACCEL_MG_LSB_8G            (0.244F)
-#define LSM9DS1_ACCEL_MG_LSB_16G           (0.732F) 
+#define LSM9DS1_ACCEL_MG_LSB_16G           (0.732F)
 
 // Magnetic Field Strength: gauss range
 #define LSM9DS1_MAG_MGAUSS_4GAUSS          (0.14F)
@@ -106,7 +106,7 @@ typedef struct
     float z;
 } lsm9ds1_vector_t;
 
-typedef struct {
+typedef struct lsm9ds1_cfg {
     lsm9ds1_accel_range_t accel_range;
     lsm9ds1_accel_data_rate_t accel_rate;
     lsm9ds1_mag_gain_t mag_gain;
@@ -117,7 +117,7 @@ typedef struct {
     sensor_type_t mask;
 } lsm9ds1_cfg_t;
 
-typedef struct {
+typedef struct lsm9ds1 {
     struct os_dev dev;
     struct sensor sensor;
     lsm9ds1_cfg_t cfg;
