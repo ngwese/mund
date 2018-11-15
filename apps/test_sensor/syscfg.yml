@@ -21,9 +21,12 @@ syscfg.vals:
 
   # Disable sensor package OIC integration
   SENSOR_OIC: 0
+  SENSOR_CLI: 1
 
   # Enable hardware
   I2C_0: 1
-  I2C_0_FREQ_KHZ: 400
+  # I2C_0_FREQ_KHZ: 400
   LSM9DS1_OFB: 1
+
+  HARDFLOAT: 0
 

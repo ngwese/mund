@@ -25,8 +25,8 @@
 extern "C" {
 #endif
 
-#define LSM9DS1_ADDRESS_ACCELGYRO          (0x6B)
-#define LSM9DS1_ADDRESS_MAG                (0x1E)
+#define LSM9DS1_ADDRESS_ACCELGYRO          (0xD4)
+#define LSM9DS1_ADDRESS_MAG                (0x38)
 #define LSM9DS1_XG_ID                      (0b01101000)
 #define LSM9DS1_MAG_ID                     (0b00111101)
 

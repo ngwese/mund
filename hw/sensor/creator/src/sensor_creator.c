@@ -83,6 +83,8 @@ config_lsm9ds1_sensor(void)
     lsmcfg.gyro_scale = LSM9DS1_GYROSCALE_245DPS;
 
     // FIXME: configure accel_addr, mag_addr or remove
+    lsmcfg.accel_addr = LSM9DS1_ADDRESS_ACCELGYRO;
+    lsmcfg.mag_addr = LSM9DS1_ADDRESS_MAG;
 
     lsmcfg.mask = SENSOR_TYPE_LINEAR_ACCEL |
                   SENSOR_TYPE_GYROSCOPE |

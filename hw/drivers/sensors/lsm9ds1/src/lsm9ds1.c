@@ -134,6 +134,7 @@ lsm9ds1_read8(struct sensor_itf *itf, uint8_t addr, uint8_t reg,
 
     /* Read one byte back */
     payload = 0;
+    data_struct.address = addr | 0b1;  // add read bit to address
     rc = hal_i2c_master_read(itf->si_num, &data_struct,
                              OS_TICKS_PER_SEC / 10, 1);
     *value = payload;
@@ -184,6 +185,7 @@ lsm9ds1_read48(struct sensor_itf *itf, uint8_t addr, uint8_t reg,
     /* Read six bytes back */
     memset(payload, 0, sizeof(payload));
     data_struct.len = 6;
+    data_struct.address = addr | 0b1;   // add read bit
     rc = hal_i2c_master_read(itf->si_num, &data_struct,
                              OS_TICKS_PER_SEC / 10, 1);
 
