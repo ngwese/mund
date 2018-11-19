@@ -6,7 +6,7 @@
 #include "hal/hal_gpio.h"
 #include "sysinit/sysinit.h"
 
-//#include "lsm9ds1/lsm9ds1.h"
+#include "lsm9ds1/lsm9ds1.h"
 
 int
 main(int argc, char **argv)
@@ -15,6 +15,10 @@ main(int argc, char **argv)
 
     /* Initialize the OS */
     sysinit();
+
+#if MYNEWT_VAL(LSM9DS1_CLI)
+    lsm9ds1_shell_init();
+#endif
 
     /* Configure the LED GPIO as an output and HIGH (On) */
     hal_gpio_init_out(LED_BLINK_PIN, 1);

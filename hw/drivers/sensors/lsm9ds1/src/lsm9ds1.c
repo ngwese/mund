@@ -523,3 +523,21 @@ lsm9ds1_sensor_get_config(struct sensor *sensor, sensor_type_t type,
 err:
     return (rc);
 }
+
+int
+lsm9ds1_get_chip_id(struct sensor_itf *itf, uint8_t *id)
+{
+    int rc;
+    uint8_t tmp;
+
+    rc = lsm9ds1_read8(itf, LSM9DS1_ADDRESS_ACCELGYRO, LSM9DS1_REGISTER_WHO_AM_I_XG, &tmp);
+    if (rc) {
+        goto err;
+    }
+
+    *id = tmp;
+
+    return 0;
+err:
+    return rc;
+}

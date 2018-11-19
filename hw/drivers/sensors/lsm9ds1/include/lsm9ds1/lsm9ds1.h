@@ -127,6 +127,12 @@ typedef struct lsm9ds1 {
 int lsm9ds1_init(struct os_dev *, void *);
 int lsm9ds1_config(lsm9ds1_t *, lsm9ds1_cfg_t *);
 
+#if MYNEWT_VAL(LSM9DS1_CLI)
+int lsm9ds1_shell_init(void);
+#endif
+
+int lsm9ds1_get_chip_id(struct sensor_itf *itf, uint8_t *id);
+
 #ifdef __cplusplus
 }
 #endif
