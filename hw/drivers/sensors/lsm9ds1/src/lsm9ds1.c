@@ -7,6 +7,7 @@
 #include "sensor/sensor.h"
 #include "sensor/accel.h"
 #include "sensor/mag.h"
+#include "sensor/temperature.h"
 
 #include "lsm9ds1/lsm9ds1.h"
 #include "lsm9ds1_priv.h"
@@ -232,7 +233,7 @@ lsm9ds1_init(struct os_dev *dev, void *arg)
     lsm = (lsm9ds1_t *)dev;
 
     lsm->cfg.mask = SENSOR_TYPE_LINEAR_ACCEL | SENSOR_TYPE_GYROSCOPE |
-                    SENSOR_TYPE_MAGNETIC_FIELD;
+                    SENSOR_TYPE_MAGNETIC_FIELD | SENSOR_TYPE_TEMPERATURE;
 
     log_register(dev->od_name, &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 
@@ -365,6 +366,7 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
 {
     int rc;
     int16_t x, y, z;
+    uint8_t temp_h, temp_l;
     float mg_lsb;
     int16_t gauss_lsb_xy;
     int16_t gauss_lsb_z;
@@ -374,12 +376,14 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
     union {
         struct sensor_accel_data sad;
         struct sensor_mag_data smd;
+        struct sensor_temp_data std;
     } databuf;
 
     /* If the read isn't looking for accel or mag data, don't do anything. */
     if ((!(type & SENSOR_TYPE_LINEAR_ACCEL)) &&
         (!(type & SENSOR_TYPE_GYROSCOPE)) &&
-        (!(type & SENSOR_TYPE_MAGNETIC_FIELD))) {
+        (!(type & SENSOR_TYPE_MAGNETIC_FIELD)) &&
+        (!(type & SENSOR_TYPE_TEMPERATURE))) {
         rc = SYS_EINVAL;
         goto err;
     }
@@ -505,8 +509,28 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
         }
     }
 
+    if (type & SENSOR_TYPE_TEMPERATURE) {
+        temp_h = temp_l = 0;
+        rc = lsm9ds1_read8(itf, lsm->cfg.accel_addr, LSM9DS1_REGISTER_TEMP_OUT_H, &temp_h);
+        if (rc != 0) {
+            goto err;
+        }
+        rc = lsm9ds1_read8(itf, lsm->cfg.accel_addr, LSM9DS1_REGISTER_TEMP_OUT_L, &temp_l);
+        if (rc != 0) {
+            goto err;
+        }
+
+        x = (int16_t)(temp_l | ((int16_t)(temp_h << 8)));
+        databuf.std.std_temp = x;   // convert to degrees C
+        databuf.std.std_temp_is_valid = 1;
+
+        rc = data_func(sensor, data_arg, &databuf.std, SENSOR_TYPE_TEMPERATURE);
+        if (rc != 0) {
+            goto err;
+        }
+    }
+
     // TODO: implement SENSOR_TYPE_GYROSCOPE
-    // TODO: implement SENSOR_TYPE_TEMPERATURE
 
     return (0);
 err:

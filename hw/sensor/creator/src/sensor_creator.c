@@ -46,6 +46,8 @@ config_lsm9ds1_sensor(void)
     dev = (struct os_dev *) os_dev_open("lsm9ds1_0", OS_TIMEOUT_NEVER, NULL);
     assert(dev != NULL);
 
+    // TODO: move this default config into driver
+
     /* read once per sec.  API should take this value in ms. */
     lsmcfg.accel_rate = LSM9DS1_ACCELDATARATE_14_9HZ;
     lsmcfg.accel_range = LSM9DS1_ACCELRANGE_2G;
@@ -59,7 +61,8 @@ config_lsm9ds1_sensor(void)
 
     lsmcfg.mask = SENSOR_TYPE_LINEAR_ACCEL |
                   SENSOR_TYPE_GYROSCOPE |
-                  SENSOR_TYPE_MAGNETIC_FIELD;
+                  SENSOR_TYPE_MAGNETIC_FIELD |
+                  SENSOR_TYPE_TEMPERATURE;
 
     rc = lsm9ds1_config((struct lsm9ds1 *) dev, &lsmcfg);
 
