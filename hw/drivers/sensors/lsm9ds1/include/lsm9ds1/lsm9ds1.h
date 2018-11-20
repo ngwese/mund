@@ -124,6 +124,10 @@ typedef struct lsm9ds1 {
     os_time_t last_read_time;
 } lsm9ds1_t;
 
+#if MYNEWT_VAL(I2C_0)
+extern struct sensor_itf g_lsm9ds1_i2c_0_itf;
+#endif
+
 int lsm9ds1_init(struct os_dev *, void *);
 int lsm9ds1_config(lsm9ds1_t *, lsm9ds1_cfg_t *);
 

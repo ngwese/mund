@@ -65,6 +65,15 @@ static const struct sensor_driver g_lsm9ds1_sensor_driver = {
     lsm9ds1_sensor_get_config
 };
 
+#if MYNEWT_VAL(I2C_0)
+struct sensor_itf g_lsm9ds1_i2c_0_itf = {
+    .si_type = SENSOR_ITF_I2C,
+    .si_num  = 0,
+    .si_addr = 0
+};
+#endif
+
+
 /**
  * Writes a single byte to the specified register
  *
@@ -365,7 +374,7 @@ lsm9ds1_sensor_read(struct sensor *sensor, sensor_type_t type,
     union {
         struct sensor_accel_data sad;
         struct sensor_mag_data smd;
-    }databuf;
+    } databuf;
 
     /* If the read isn't looking for accel or mag data, don't do anything. */
     if ((!(type & SENSOR_TYPE_LINEAR_ACCEL)) &&

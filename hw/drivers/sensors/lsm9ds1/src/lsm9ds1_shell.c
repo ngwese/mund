@@ -24,13 +24,6 @@ static struct shell_cmd lsm9ds1_shell_cmd_struct = {
     .sc_cmd_func = lsm9ds1_shell_cmd
 };
 
-/*
-static struct sensor_itf g_sensor_itf = {
-    .si_type = MYNEWT_VAL(LSM9DS1_SHELL_ITF_TYPE),
-    .si_num = MYNEWT_VAL(LSM9DS1_SHELL_ITF_NUM),
-    .si_addr = MYNEWT_VAL(LSM9DS1_SHELL_ITF_ADDR),
-};
-*/
 
 static int
 lsm9ds1_shell_err_too_many_args(char *cmd_name)
@@ -72,22 +65,21 @@ lsm9ds1_shell_help(void)
 static int
 lsm9ds1_shell_cmd_get_chip_id(int argc, char **argv)
 {
-    // // uint8_t id;
-    // int rc;
+    uint8_t id;
+    int rc;
 
     if (argc > 3) {
         return lsm9ds1_shell_err_too_many_args(argv[1]);
     }
 
     /* Display the chip id */
-    // if (argc == 2) {
-    //     rc = lsm9ds1_get_chip_id(&g_sensor_itf, &id);
-    //     if (rc) {
-    //         console_printf("Read failed %d", rc);
-    //     }
-    //     console_printf("0x%02X\n", id);
-    // }
-    console_printf("not implemented\n");
+    if (argc == 2) {
+        rc = lsm9ds1_get_chip_id(&g_lsm9ds1_i2c_0_itf, &id);
+        if (rc) {
+            console_printf("Read failed %d", rc);
+        }
+        console_printf("0x%02X\n", id);
+    }
 
     return 0;
 }

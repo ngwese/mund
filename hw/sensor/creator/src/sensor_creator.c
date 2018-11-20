@@ -31,35 +31,6 @@ static struct lsm9ds1 lsm9ds1;
 #endif
 
 /**
- * If a UART sensor needs to be created, interface is defined in
- * the following way
- *
- * #if MYNEWT_VAL(UART_0)
- * static const struct sensor_itf uart_0_itf = {
- *   .si_type = SENSOR_ITF_UART,
- *   .si_num = 0,
- * };
- * #endif
- *
- * #if MYNEWT_VAL(UART_1)
- * static struct sensor_itf uart_1_itf = {
- *    .si_type = SENSOR_ITF_UART,
- *    .si_num = 1,
- *};
- *#endif
- */
-
-
-#if MYNEWT_VAL(I2C_0) && MYNEWT_VAL(LSM9DS1_OFB)
-static struct sensor_itf i2c_0_itf_lsm = {
-    .si_type = SENSOR_ITF_I2C,
-    .si_num  = 0,
-    .si_addr = 0
-};
-#endif
-
-
-/**
  * lsm9ds1 Sensor default configuration used by the creator package
  *
  * @return 0 on success, non-zero on failure
@@ -114,7 +85,7 @@ ext_sensor_dev_create(void)
      * from the config, however teh develeoper would like to deal with it.
      */
     rc = os_dev_create((struct os_dev *) &lsm9ds1, "lsm9ds1_0",
-      OS_DEV_INIT_PRIMARY, 0, lsm9ds1_init, (void *)&i2c_0_itf_lsm);
+      OS_DEV_INIT_PRIMARY, 0, lsm9ds1_init, (void *)&g_lsm9ds1_i2c_0_itf);
     assert(rc == 0);
 
     rc = config_lsm9ds1_sensor();
