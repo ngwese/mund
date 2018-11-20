@@ -533,20 +533,39 @@ err:
     return (rc);
 }
 
-int
-lsm9ds1_get_chip_id(struct sensor_itf *itf, uint8_t *id)
+static int
+lsm9ds1_checked_read8(struct sensor_itf *itf, uint8_t addr, uint8_t reg,
+                      uint8_t *value)
 {
     int rc;
     uint8_t tmp;
 
-    rc = lsm9ds1_read8(itf, LSM9DS1_ADDRESS_ACCELGYRO, LSM9DS1_REGISTER_WHO_AM_I_XG, &tmp);
+    rc = lsm9ds1_read8(itf, addr, reg, &tmp);
     if (rc) {
         goto err;
     }
 
-    *id = tmp;
+    *value = tmp;
 
     return 0;
 err:
     return rc;
+}
+
+int
+lsm9ds1_get_chip_id(struct sensor_itf *itf, uint8_t *id)
+{
+    return lsm9ds1_checked_read8(itf, LSM9DS1_ADDRESS_ACCELGYRO, LSM9DS1_REGISTER_WHO_AM_I_XG, id);
+}
+
+int
+lsm9ds1_get_accel_status(struct sensor_itf *itf, uint8_t *status)
+{
+    return lsm9ds1_checked_read8(itf, LSM9DS1_ADDRESS_ACCELGYRO, LSM9DS1_REGISTER_STATUS_REG, status);
+}
+
+int
+lsm9ds1_get_mag_status(struct sensor_itf *itf, uint8_t *status)
+{
+    return lsm9ds1_checked_read8(itf, LSM9DS1_ADDRESS_MAG, LSM9DS1_REGISTER_STATUS_REG_M, status);
 }

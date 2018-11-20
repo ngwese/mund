@@ -136,6 +136,8 @@ int lsm9ds1_shell_init(void);
 #endif
 
 int lsm9ds1_get_chip_id(struct sensor_itf *itf, uint8_t *id);
+int lsm9ds1_get_accel_status(struct sensor_itf *itf, uint8_t *id);
+int lsm9ds1_get_mag_status(struct sensor_itf *itf, uint8_t *id);
 
 #ifdef __cplusplus
 }

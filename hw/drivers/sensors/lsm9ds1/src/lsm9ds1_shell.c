@@ -57,7 +57,7 @@ lsm9ds1_shell_help(void)
     console_printf("%s cmd [flags...]\n", lsm9ds1_shell_cmd_struct.sc_cmd);
     console_printf("cmd:\n");
     console_printf("\tchip_id\n");
-    console_printf("\treset\n");
+    console_printf("\tstatus\n");
 
     return 0;
 }
@@ -76,7 +76,7 @@ lsm9ds1_shell_cmd_get_chip_id(int argc, char **argv)
     if (argc == 2) {
         rc = lsm9ds1_get_chip_id(&g_lsm9ds1_i2c_0_itf, &id);
         if (rc) {
-            console_printf("Read failed %d", rc);
+            console_printf("Read failed %d\n", rc);
         }
         console_printf("0x%02X\n", id);
     }
@@ -85,12 +85,34 @@ lsm9ds1_shell_cmd_get_chip_id(int argc, char **argv)
 }
 
 static int
-lsm9ds1_shell_cmd_reset(int argc, char **argv)
+lsm9ds1_shell_cmd_get_status(int argc, char **argv)
 {
+    uint8_t accel_status, mag_status;
+    int rc;
 
-    console_printf("not implemented\n");
+    if (argc > 2) {
+        return lsm9ds1_shell_err_too_many_args(argv[1]);
+    }
+
+    if (argc == 2) {
+        rc = lsm9ds1_get_accel_status(&g_lsm9ds1_i2c_0_itf, &accel_status);
+        if (rc) {
+            console_printf("Accel status read failed %d\n", rc);
+            goto err;
+        }
+        rc = lsm9ds1_get_mag_status(&g_lsm9ds1_i2c_0_itf, &mag_status);
+        if (rc) {
+            console_printf("Accel status read failed %d\n", rc);
+            goto err;
+        }
+        console_printf("accel: 0x%02X, mag: 0x%02X\n", accel_status, mag_status);
+    }
+
+ err:
     return 0;
 }
+
+
 
 static int
 lsm9ds1_shell_cmd(int argc, char **argv)
@@ -99,14 +121,12 @@ lsm9ds1_shell_cmd(int argc, char **argv)
         return lsm9ds1_shell_help();
     }
 
-    /* Chip ID command */
     if (argc > 1 && strcmp(argv[1], "chip_id") == 0) {
         return lsm9ds1_shell_cmd_get_chip_id(argc, argv);
     }
 
-    /* Reset command */
-    if (argc > 1 && strcmp(argv[1], "reset") == 0) {
-        return lsm9ds1_shell_cmd_reset(argc, argv);
+    if (argc > 1 && strcmp(argv[1], "status") == 0) {
+        return lsm9ds1_shell_cmd_get_status(argc, argv);
     }
 
     return lsm9ds1_shell_err_unknown_arg(argv[1]);
