@@ -68,7 +68,7 @@ lsm9ds1_shell_cmd_get_chip_id(int argc, char **argv)
     uint8_t id;
     int rc;
 
-    if (argc > 3) {
+    if (argc > 2) {
         return lsm9ds1_shell_err_too_many_args(argv[1]);
     }
 
@@ -87,6 +87,7 @@ lsm9ds1_shell_cmd_get_chip_id(int argc, char **argv)
 static int
 lsm9ds1_shell_cmd_reset(int argc, char **argv)
 {
+
     console_printf("not implemented\n");
     return 0;
 }
